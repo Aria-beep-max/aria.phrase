@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>常用語工具</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #111; --surface: #1a1a1a; --border: #2a2a2a;
+  --text: #e8e8e8; --muted: #666;
+  --en: #60b8f0; --zh: #f0c060; --ko: #c060f0;
+  --en-bg: #0d2233; --zh-bg: #2a2000; --ko-bg: #1e0d33;
+}
+html, body { width: 490px; height: 220px; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Noto Sans TC', 'Malgun Gothic', sans-serif; font-size: 12px; user-select: none; }
+.app { display: flex; flex-direction: column; width: 490px; height: 220px; }
+.topbar { display: flex; align-items: center; height: 26px; background: #161616; border-bottom: 1px solid var(--border); flex-shrink: 0; padding: 0 10px; gap: 8px; }
+.app-title { font-family: monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+.name-wrap { display: flex; align-items: center; gap: 5px; margin-left: auto; }
+.name-label { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.name-input { width: 88px; height: 18px; padding: 0 7px; background: var(--bg); border: 1px solid var(--border); border-radius: 3px; color: var(--text); font-size: 11px; outline: none; }
+.name-input:focus { border-color: #555; }
+.name-input::placeholder { color: #333; }
+.folder-row { display: flex; height: 28px; flex-shrink: 0; background: #0d0d0d; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+.folder-row::-webkit-scrollbar { display: none; }
+.folder-tab { display: flex; align-items: center; gap: 5px; padding: 0 11px; height: 100%; cursor: pointer; font-size: 11px; color: #777; border: none; background: transparent; white-space: nowrap; border-right: 1px solid var(--border); border-bottom: 2px solid transparent; transition: all 0.1s; flex-shrink: 0; margin-bottom: -1px; }
+.folder-tab:hover { color: #ccc; background: #161616; }
+.folder-tab.active { color: #fff; background: var(--surface); border-bottom-color: var(--tc); }
+.folder-tab .ficon { font-size: 12px; }
+.content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 5px 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; align-content: start; scrollbar-width: thin; scrollbar-color: #2a2a2a transparent; }
+.phrase-group { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.group-header { padding: 4px 7px; font-size: 11px; color: #aaa; border-bottom: 1px solid var(--border); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lang-btns { display: flex; }
+.lang-btn { flex: 1; display: flex; align-items: center; justify-content: center; height: 26px; border: none; background: transparent; cursor: pointer; font-family: monospace; font-size: 12px; font-weight: 700; border-right: 1px solid var(--border); transition: background 0.1s; }
+.lang-btn:last-child { border-right: none; }
+.lang-btn.en { color: var(--en); }
+.lang-btn.zh { color: var(--zh); }
+.lang-btn.ko { color: var(--ko); }
+.lang-btn:hover.en, .lang-btn.copied.en { background: var(--en-bg); }
+.lang-btn:hover.zh, .lang-btn.copied.zh { background: var(--zh-bg); }
+.lang-btn:hover.ko, .lang-btn.copied.ko { background: var(--ko-bg); }
+.lang-btn.empty { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
+.toast { position: fixed; bottom: 6px; left: 50%; transform: translateX(-50%) translateY(8px); background: #c8f060; color: #0f0f0f; font-family: monospace; font-size: 10px; font-weight: 700; padding: 3px 14px; border-radius: 3px; opacity: 0; transition: all 0.12s; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <span class="app-title">PHRASE TOOL</span>
+    <div class="name-wrap">
+      <span class="name-label">句尾名字：</span>
+      <input class="name-input" id="name-input" type="text" placeholder="輸入名字...">
+    </div>
+  </div>
+  <div class="folder-row" id="folder-row"></div>
+  <div class="content" id="content"></div>
+</div>
+<div class="toast" id="toast">已複製</div>
+
+<script>
+const COLORS = ['#60b8f0','#60f0a0','#f0c060','#f07860','#c060f0'];
+const data = {
+  sections: [
+    { id:"greeting", label:"開頭語", icon:"💬", groups:[
+      { key:"greeting_open", label:"開頭" },
+      { key:"greeting_wait", label:"等候" },
+      { key:"greeting_checking", label:"確認中" },
+      { key:"greeting_waiting", label:"調查中" }
+    ]},
+    { id:"settled", label:"結算", icon:"✅", groups:[
+      { key:"settled", label:"Settled" },
+      { key:"resettled", label:"Resettled" },
+      { key:"no_info", label:"No Info" },
+      { key:"no_link", label:"No Link" },
+      { key:"postponed", label:"Postponed" },
+      { key:"in_play", label:"進行中" },
+      { key:"correct_odds", label:"Correct Odds" },
+      { key:"feed_interrupt", label:"Feed 中斷" },
+      { key:"wrong_time", label:"Wrong Time" }
+    ]},
+    { id:"sa", label:"SA", icon:"🔖", groups:[
+      { key:"sa_criteria", label:"Criteria" },
+      { key:"sa_no_irr", label:"No Irr." },
+      { key:"sa_arb", label:"Arbitrager" },
+      { key:"sa_no_limit", label:"No Limit" },
+      { key:"sa_monitor", label:"Monitor" },
+      { key:"sa_remove", label:"Remove" }
+    ]},
+    { id:"debug", label:"排錯", icon:"🔧", groups:[
+      { key:"debug_login", label:"測試正常" },
+      { key:"debug_account", label:"提供帳號" }
+    ]},
+    { id:"forward", label:"轉交", icon:"📨", groups:[
+      { key:"fwd_weekday", label:"工作日" },
+      { key:"fwd_holiday", label:"非工作日" }
+    ]}
+  ],
+  phrases: {
+    greeting_open_en:"We are checking this, please allow us a moment for that. Thank you.",
+    greeting_open_zh:"您好，立即为您确认，请稍等。",
+    greeting_open_ko:"안녕하세요, 지금 바로 확인해 드리겠습니다. 잠시만 기다려 주십시오.",
+    greeting_wait_en:"The relevant team is checking it and we will keep you posted. Thank you for your patience.",
+    greeting_wait_zh:"相关单位确认中，一有消息会立即通知贵司，谢谢。",
+    greeting_wait_ko:"관련 부서에서 확인 중이며, 소식이 나오는 즉시 귀사에 바로 안내드리겠습니다. 감사합니다.",
+    greeting_checking_en:"please allow us a moment for that. Thank you.",
+    greeting_checking_zh:"确认中，请稍等。",
+    greeting_checking_ko:"확인 중입니다. 잠시만 기다려 주세요.",
+    greeting_waiting_en:"Information regarding this event is currently under review. Should there be any updates, relevant bets will be handled accordingly. Thank you.",
+    greeting_waiting_zh:"该赛事资讯目前正在审查中，若后续有任何更新，相关投注将对应处理，谢谢。",
+    greeting_waiting_ko:"해당 이벤트에 대한 정보는 현재 검토 중입니다. 추후 업데이트가 있을 경우 관련 베팅은 그에 따라 처리될 예정입니다. 감사합니다.",
+    settled_en:"Thank you for waiting. The bet has been settled but BO needs 5-10 mins to be updated. Please check again then. Thank you.",
+    settled_zh:"注单已结算，后台更新需要5-10分钟，烦请贵司稍等刷新查看，谢谢。",
+    settled_ko:"주문이 결제 완료되었습니다. 백엔드 업데이트에는 5~10분이 소요될 수 있으니, 잠시 후 새로 고침 후 확인 부탁드립니다. 감사합니다.",
+    resettled_en:"Thank you for waiting. The bet has been resettled but BO needs 5-10 mins to be updated. Please check again then. Thank you.",
+    resettled_zh:"此注单已重新修正，后台更新需要5-10分钟，烦请贵司稍等刷新查看，谢谢。",
+    resettled_ko:"베팅이 재설정되었습니다. 백엔드 업데이트에는 5~10분이 소요될 수 있으니, 잠시 후 새로 고침 후 확인 부탁드립니다. 감사합니다.",
+    no_info_en:"We have no official information available yet. Once there is an update, the bets will be modified and set accordingly.",
+    no_info_zh:"经确认，该赛事暂无官方资讯，待确认官方赛果后将会立即自动结算，还请您理解并解释给予您的玩家，谢谢。",
+    no_info_ko:"현재 해당 경기에 대한 공식 정보가 없습니다. 업데이트가 있을 경우, 배팅 정보는 해당 설정에 맞게 수정될 것입니다. 감사합니다.",
+    no_link_en:"Unfortunately, we cannot provide any official links for the match at the moment, but the bet is settled correctly according to our source.",
+    no_link_zh:"该赛事未有参考链结可提供，依据我方赛果结算正确。",
+    no_link_ko:"현재 해당 경기의 공식 링크는 제공해드릴 수 없지만, 당사 기준 소스를 바탕으로 베팅은 정상적으로 정산되었습니다.",
+    postponed_en:"This event has been postponed.\nOur team will wait up to 24 hours for official confirmation and will process the settlement accordingly once the information is received.\nThank you for your patience and understanding.",
+    postponed_zh:"此赛事延期，相关团队将会等候24小时，待收到官方信息后进行相对应处理，还请您耐心等候，谢谢。",
+    postponed_ko:"해당 경기는 연기되었습니다.\n당사 팀은 공식 결과를 확인하기 위해 최대 24시간 동안 대기한 후, 관련 규정에 따라 처리할 예정입니다.\n기다려 주셔서 감사합니다.",
+    in_play_en:"Match is still in play, will be settled when the event is finished.",
+    in_play_zh:"赛事进行中，会于完赛后尽快结算。",
+    in_play_ko:"경기는 아직 진행 중이며, 이벤트가 종료되면 결과가 확정됩니다.",
+    correct_odds_en:"After review by our team, the odds are correct and the bet is valid.",
+    correct_odds_zh:"相关团队确认盘口/赔率正确，注单有效。",
+    correct_odds_ko:"당사 팀의 검토 결과, 배당률은 정상이며 해당 베팅은 유효한 것으로 확인되었습니다.",
+    feed_interrupt_en:"due to feed interruption, line and odds are not updated",
+    feed_interrupt_zh:"因赛果回报中断，注单盘口赔率未更新",
+    feed_interrupt_ko:"피드 중단으로 인해 라인 및 배당률이 업데이트되지 않고 있습니다.",
+    wrong_time_en:"we had wrong time, it will be played at 2025-09-07 07:15 UTC\nbet will be settled when it is finished",
+    wrong_time_zh:"经确认，原先提供不正确赛事时间，将于2026-03-05 16:00 UTC进行\n注单会于赛事结束后结算",
+    wrong_time_ko:"확인 결과, 이전에 잘못된 경기 시간이 제공된 것으로 나타났으며, 경기는 2026년 3월 5일 16:00 UTC에 진행될 예정입니다.\n베팅은 경기 종료 후 정산됩니다.",
+    sa_criteria_en:"To continuously strive to improve service efficiency, we would like to inform you of the standard adjustment regarding member anomaly checks. These changes aim to ensure a smoother experience for both our team and your operations.\n\n1. Members with higher stakes, the average stake is over 100 GBP and at least 5 bets in 30 days.\n\n2. Members win over 1000 GBP in 30 days.\n\nPlease note that unfortunately, we are unable to provide inspection services for cases that do not meet the above criteria.",
+    sa_criteria_zh:"为了持续努力提高服务效率，告知您关于会员异常检查的标准调整。这些变化旨在确保我方团队和您的营运都能获得更加顺畅的体验。\n\n更新后的异常检查标准如下：\n\n1. 三十天内会员投注超过五张且平均金额高于 900 人民币。\n\n2. 三十天内净盈利高于 9000 人民币。\n\n请注意，要是不符合上述标准的案例，很遗憾地，我们无法提供检查服务。\n\n查看该玩家不符合查询标准。",
+    sa_criteria_ko:"서비스 효율성을 지속적으로 향상시키기 위해 회원 이상 여부 확인 기준 조정 사항을 안내드립니다. 이번 조정은 양사 운영 및 업무 진행의 원활함을 높이기 위한 목적입니다.\n\n- 고액 베팅 회원: 최근 30일 기준 평균 베팅 금액이 100 GBP 이상이며, 최소 5회 이상 베팅한 회원\n\n- 최근 30일 기준 수익금이 1000 GBP 이상인 회원\n\n상기 기준에 부합하지 않는 경우에는 점검 서비스를 제공해드리기 어려운 점 양해 부탁드립니다. 감사합니다.",
+    sa_no_irr_en:"No irregularities.",
+    sa_no_irr_zh:"没有异常。",
+    sa_no_irr_ko:"문제 없음.",
+    sa_arb_en:"The player is arbitrager, limit 1 GBP.",
+    sa_arb_zh:"套利玩家，限额1英镑。",
+    sa_arb_ko:"차익거래자, 한도 1파운드.",
+    sa_no_limit_en:"No limit",
+    sa_no_limit_zh:"沒有限額",
+    sa_no_limit_ko:"한도가 없습니다.",
+    sa_monitor_en:"no irregularities, under close monitor",
+    sa_monitor_zh:"目前没有异常，持续关注中",
+    sa_monitor_ko:"현재 이상은 없으며 지속적으로 모니터링 중입니다.",
+    sa_remove_en:"We do not suggest remove limits since the member is arbitrager. Removing limits could increase loss of money for your company, and needs to be monitored by your side.\nPlease confirm again, thank you.",
+    sa_remove_zh:"我们不建议解除套利玩家的限额；解除限制可能会增加贵公司的资金损失，需要贵方监督。请再次确认，谢谢。",
+    sa_remove_ko:"차익 거래 플레이어의 한도를 해제하는 것은 권장하지 않습니다. 한도를 해제하면 귀사의 자금 손실이 커질 수 있습니다. 따라서 귀사가 이를 면밀히 모니터링해야 합니다. 다시 한번 확인해 주시기 바랍니다. 감사합니다.",
+    debug_login_en:"We've tested the login and it works properly. It's possible that the member page hasn't finished loading. Please ask the player to clear their cache and try logging in again in a stable network environment. Thank you.",
+    debug_login_zh:"您好，经测试登入正常，可能是会员网路未加载完成，还请引导玩家清除缓存，并在良好的网路环境下，重新尝试登入下，谢谢。",
+    debug_login_ko:"안녕하세요. 테스트 결과 로그인은 정상적으로 이루어졌습니다. 회원님의 네트워크 연결이 완전히 설정되지 않았을 가능성이 있으니, 플레이어에게 캐시를 삭제하고 안정적인 네트워크 환경에서 다시 로그인을 시도해 보도록 안내해 주시기 바랍니다. 감사합니다.",
+    debug_account_en:"May you provide URL and test account? We will check further",
+    debug_account_zh:"请您提供网址以及测试账号，以便我们进一步查看，谢谢。",
+    debug_account_ko:"URL과 테스트 계정을 제공해 주실 수 있나요? 저희가 자세히 확인해 보겠습니다.",
+    fwd_weekday_en:"We have submitted your request and will notify your company as soon as we have any updates. Thank you.",
+    fwd_weekday_zh:"我们已为您提交，一有消息会立即通知贵司，谢谢。",
+    fwd_weekday_ko:"신청을 완료했습니다. 소식이 있는 대로 귀사에 즉시 알려드리겠습니다. 감사합니다.",
+    fwd_holiday_en:"We have submitted your request, but the relevant department is currently closed. The team typically begins work at approximately 11:00 UTC +8. We will notify your company as soon as we have any updates. Thank you.",
+    fwd_holiday_zh:"我们已为您提交，但目前非相关部门的工作时段，相关团队开始上班时间約11:00 UTC +8，一有消息会立即通知贵司，谢谢。",
+    fwd_holiday_ko:"귀사의 요청을 접수했습니다. 다만 현재 해당 부서의 업무 시간 외이므로, 담당 팀은 약 11:00 (UTC+8)부터 업무를 시작합니다. 소식이 있는 대로 즉시 귀사에 알려드리겠습니다. 감사합니다."
+  }
+};
+
+const LANGS = ['en','zh','ko'];
+const LANG_LABEL = { en:'EN', zh:'中', ko:'韓' };
+let activeSection = 'greeting';
+
+function getName() { return document.getElementById('name-input').value.trim(); }
+
+function copyText(text, btn) {
+  const name = getName();
+  const final = name ? text.trimEnd() + ' ' + name : text;
+  const ok = () => {
+    btn.classList.add('copied');
+    showToast();
+    setTimeout(() => btn.classList.remove('copied'), 800);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(final).then(ok).catch(() => fallback(final, ok));
+  } else { fallback(final, ok); }
+}
+
+function fallback(text, cb) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); cb(); } catch(e){}
+  document.body.removeChild(ta);
+}
+
+function setSection(id) {
+  activeSection = id;
+  document.querySelectorAll('.folder-tab').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  renderContent();
+}
+
+function renderFolders() {
+  const el = document.getElementById('folder-row');
+  el.innerHTML = data.sections.map((s, i) =>
+    `<button class="folder-tab${s.id===activeSection?' active':''}" data-id="${s.id}" style="--tc:${COLORS[i]}">
+      <span class="ficon">${s.icon}</span>${s.label}
+    </button>`
+  ).join('');
+  el.querySelectorAll('.folder-tab').forEach(b => b.addEventListener('click', () => setSection(b.dataset.id)));
+}
+
+function renderContent() {
+  const sec = data.sections.find(s => s.id === activeSection);
+  const el = document.getElementById('content');
+  el.innerHTML = sec.groups.map(g => {
+    const btns = LANGS.map(lang => {
+      const text = data.phrases[g.key + '_' + lang] || '';
+      const empty = !text;
+      return `<button class="lang-btn ${lang}${empty?' empty':''}" data-key="${g.key}" data-lang="${lang}"${empty?' disabled':''}>${LANG_LABEL[lang]}</button>`;
+    }).join('');
+    return `<div class="phrase-group">
+      <div class="group-header">${g.label}</div>
+      <div class="lang-btns">${btns}</div>
+    </div>`;
+  }).join('');
+
+  el.querySelectorAll('.lang-btn:not(.empty)').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = data.phrases[btn.dataset.key + '_' + btn.dataset.lang] || '';
+      copyText(text, btn);
+    });
+  });
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 800);
+}
+
+renderFolders();
+renderContent();
+</script>
+</body>
+</html>
