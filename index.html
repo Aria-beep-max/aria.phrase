@@ -95,7 +95,12 @@ const data = {
     ]},
     { id:"forward", label:"轉交", icon:"📨", groups:[
       { key:"fwd_weekday", label:"工作日" },
-      { key:"fwd_holiday", label:"非工作日" }
+      { key:"fwd_holiday", label:"非工作日" },
+      { key:"resend", label:"重送" },
+      { key:"api", label:"API" }
+    ]},
+    { id:"other", label:"其他", icon:"🏷️", groups:[
+      { key:"none", label:"None" }
     ]}
   ],
   phrases: {
@@ -205,7 +210,19 @@ const data = {
 
     fwd_holiday_en:"We have submitted this on your behalf. However, the relevant department is currently outside of working hours. The team will be available from approximately 11:00 UTC+8 tomorrow. We will notify you as soon as there are any updates. Thank you.",
     fwd_holiday_zh:"我们已为您提交，但目前非相关部门的工作时段，相关团队上班时间約周一11:00 UTC +8，一有消息会立即通知贵司，谢谢。",
-    fwd_holiday_ko:"제출해 드렸습니다. 다만 현재 관련 부서의 근무 시간이 아닙니다. 해당 팀의 근무 시작 시간은 내일 오전 11:00 (UTC+8) 예정입니다. 업데이트가 있는 즉시 귀사에 알려드리겠습니다. 감사합니다."
+    fwd_holiday_ko:"제출해 드렸습니다. 다만 현재 관련 부서의 근무 시간이 아닙니다. 해당 팀의 근무 시작 시간은 내일 오전 11:00 (UTC+8) 예정입니다. 업데이트가 있는 즉시 귀사에 알려드리겠습니다. 감사합니다.",
+
+    resend_en:"If you need to resend, please submit your request to the integration group.",
+    resend_zh:"若您有重送需求，请您提交至技术群。",
+    resend_ko:"재전송이 필요하신 경우, 기술 그룹으로 제출해 주시기 바랍니다.",
+
+    api_en:"For API-related inquiries, please submit your request to the technical group. The technical team will assist you directly. Thank you.",
+    api_zh:"API相关问题请您提交至技术群，将由技术直接协助，谢谢。",
+    api_ko:"API 관련 문의 사항은 기술 그룹으로 제출해 주시기 바랍니다. 기술팀에서 직접 도움을 드릴 것입니다. 감사합니다.",
+
+    none_en:"無",
+    none_zh:"無",
+    none_ko:"無"
     
   }
 };
