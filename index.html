@@ -65,7 +65,8 @@ const data = {
       { key:"greeting_open", label:"開頭" },
       { key:"greeting_wait", label:"等候" },
       { key:"greeting_checking", label:"確認中" },
-      { key:"greeting_waiting", label:"調查中" }
+      { key:"greeting_waiting", label:"調查中-未結" }
+      { key:"greeting_waiting_settled", label:"調查中-已結" }
     ]},
     { id:"settled", label:"結算", icon:"✅", groups:[
       { key:"settled", label:"Settled" },
@@ -108,9 +109,13 @@ const data = {
     greeting_checking_zh:"确认中，请稍等。",
     greeting_checking_ko:"확인 중입니다. 잠시만 기다려 주세요.",
     
-    greeting_waiting_en:"Information regarding this event is currently under review. Should there be any updates, relevant bets will be handled accordingly. Thank you.",
-    greeting_waiting_zh:"该赛事资讯目前正在审查中，若后续有任何更新，相关投注将对应处理，谢谢。",
-    greeting_waiting_ko:"해당 이벤트에 대한 정보는 현재 검토 중입니다. 추후 업데이트가 있을 경우 관련 베팅은 그에 따라 처리될 예정입니다. 감사합니다.",
+    greeting_waiting_en:"The information for this event is currently under investigation. Should there be any updates, the related bets will be handled accordingly. Thank you.",
+    greeting_waiting_zh:"该赛事资讯目前正在调查中，若后续有任何更新，相关投注将对应处理，谢谢。",
+    greeting_waiting_ko:"해당 경기 정보는 현재 조사 중입니다. 추후 업데이트가 있을 경우, 관련 베팅은 그에 따라 처리될 예정입니다. 감사합니다.",
+
+    greeting_waiting_settled_en:"The information for this event is currently under investigation. Should there be any updates, the related bets will be resettled accordingly. Thank you.",
+    greeting_waiting_settled_zh:"该赛事资讯目前正在调查中，若后续有任何更新，相关投注将重新结算，谢谢",
+    greeting_waiting_settled_ko:"해당 경기 정보는 현재 조사 중입니다. 추후 업데이트가 있을 경우, 관련 베팅은 재정산될 예정입니다. 감사합니다.",
     
     settled_en:"Thank you for waiting. The bet has been settled but BO needs 5-10 mins to be updated. Please check again then. Thank you.",
     settled_zh:"注单已结算，后台更新需要5-10分钟，烦请贵司稍等刷新查看，谢谢。",
