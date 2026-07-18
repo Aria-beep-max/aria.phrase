@@ -78,7 +78,11 @@ const data = {
       { key:"correct_odds", label:"Correct Odds" },
       { key:"feed_interrupt", label:"Feed 中斷" },
       { key:"wrong_time", label:"Wrong Time" },
-      { key:"suspended", label:"Suspended" }
+      { key:"suspended", label:"Suspended" },
+      { key:"already_settled", label:"already settled" }
+    ]},
+    { id:"settled2", label:"結算2", icon:"✏️", groups:[
+      { key:"ref", label:"ref" },
     ]},
     { id:"sa", label:"SA", icon:"🔖", groups:[
       { key:"sa_criteria", label:"Criteria" },
@@ -144,9 +148,9 @@ const data = {
     postponed_zh:"此赛事延期，相关团队将会等候24小时，待收到官方信息后进行相对应处理，还请您耐心等候，谢谢。",
     postponed_ko:"해당 경기는 연기되었습니다.\n당사 팀은 공식 결과를 확인하기 위해 최대 24시간 동안 대기한 후, 관련 규정에 따라 처리할 예정입니다.\n기다려 주셔서 감사합니다.",
 
-    suspended_en:"This event has been suspended. The relevant team will wait 24 hours for official information before proceeding with the corresponding settlement. We appreciate your patience. Thank you. - Aria",
-    suspended_zh:"此赛事中断，相关团队将会等候24小时，待收到官方信息后进行相对应处理，还请您耐心等候，谢谢。 - Aria",
-    suspended_ko:"해당 경기가 중단되었습니다. 관련 팀은 공식 정보를 받은 후 그에 맞게 처리하기 위해 24시간 대기할 예정입니다. 기다려 주시면 감사하겠습니다. 감사합니다. - Aria",
+    suspended_en:"This event has been suspended. The relevant team will wait 24 hours for official information before proceeding with the corresponding settlement. We appreciate your patience. Thank you.",
+    suspended_zh:"此赛事中断，相关团队将会等候24小时，待收到官方信息后进行相对应处理，还请您耐心等候，谢谢。",
+    suspended_ko:"해당 경기가 중단되었습니다. 관련 팀은 공식 정보를 받은 후 그에 맞게 처리하기 위해 24시간 대기할 예정입니다. 기다려 주시면 감사하겠습니다. 감사합니다.",
     
     in_play_en:"Match is still in play, will be settled when the event is finished.",
     in_play_zh:"赛事进行中，会于完赛后尽快结算。",
@@ -163,6 +167,14 @@ const data = {
     wrong_time_en:"we had wrong time, it will be played at 2025-09-07 07:15 UTC\nbet will be settled when it is finished",
     wrong_time_zh:"经确认，原先提供不正确赛事时间，将于2026-03-05 16:00 UTC进行\n注单会于赛事结束后结算",
     wrong_time_ko:"확인 결과, 이전에 잘못된 경기 시간이 제공된 것으로 나타났으며, 경기는 2026년 3월 5일 16:00 UTC에 진행될 예정입니다.\n베팅은 경기 종료 후 정산됩니다.",
+
+    already_settled_en:"bet is settled.",
+    already_settled_zh:"注单已结算。",
+    already_settled_ko:"베팅이 정산되었습니다.",
+
+    ref_en:"settled correctly.\nreference link",
+    ref_zh:"结算正确\n参考链结",
+    ref_ko:"정산이 정확합니다.\n참고 링크.",
     
     sa_criteria_en:"To continuously strive to improve service efficiency, we would like to inform you of the standard adjustment regarding member anomaly checks. These changes aim to ensure a smoother experience for both our team and your operations.\n\n1. Members with higher stakes, the average stake is over 100 GBP and at least 5 bets in 30 days.\n\n2. Members win over 1000 GBP in 30 days.\n\nPlease note that unfortunately, we are unable to provide inspection services for cases that do not meet the above criteria.",
     sa_criteria_zh:"为了持续努力提高服务效率，告知您关于会员异常检查的标准调整。这些变化旨在确保我方团队和您的营运都能获得更加顺畅的体验。\n\n更新后的异常检查标准如下：\n\n1. 三十天内会员投注超过五张且平均金额高于 900 人民币。\n\n2. 三十天内净盈利高于 9000 人民币。\n\n请注意，要是不符合上述标准的案例，很遗憾地，我们无法提供检查服务。\n\n查看该玩家不符合查询标准。",
